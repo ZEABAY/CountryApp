@@ -5,9 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.example.countries.databinding.FragmentCountryBinding
+import com.example.countries.util.downloadFromUrl
+import com.example.countries.util.placeHolderProgressBar
 import com.example.countries.viewmodel.CountryViewModel
 
 class CountryFragment : Fragment() {
@@ -31,15 +32,12 @@ class CountryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = ViewModelProvider(this)[CountryViewModel::class.java]
-        viewModel.getDataFromRoom()
-
-
-
 
         arguments?.let {
             countryUuid = CountryFragmentArgs.fromBundle(it).countryUuid
         }
+        viewModel = ViewModelProvider(this)[CountryViewModel::class.java]
+        viewModel.getDataFromRoom(countryUuid)
 
         observeLiveData()
 
@@ -47,13 +45,19 @@ class CountryFragment : Fragment() {
 
     private fun observeLiveData() {
         viewModel.countryLiveData.observe(viewLifecycleOwner) { country ->
-            country.let {
+            country?.let {
                 binding.apply {
                     tvCountryName.text = country.countryName
                     tvCountryCapital.text = country.countryCapital
                     tvCountryRegion.text = country.countryRegion
                     tvCountryCurrency.text = country.countryCurrency
                     tvCountryLanguage.text = country.countryLanguage
+                    context?.let {
+                        ivCountryFlagImg.downloadFromUrl(
+                            country.countryFlag,
+                            placeHolderProgressBar(it)
+                        )
+                    }
                 }
 
             }

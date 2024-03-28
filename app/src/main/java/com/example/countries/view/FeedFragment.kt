@@ -1,6 +1,5 @@
 package com.example.countries.view
 
-import android.opengl.Visibility
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -38,7 +37,18 @@ class FeedFragment : Fragment() {
         binding.apply {
             countryList.layoutManager = LinearLayoutManager(context)
             countryList.adapter = countryAdapter
+            countryError.visibility = View.INVISIBLE
+
+            swipeRefreshLayout.setOnRefreshListener {
+                countryList.visibility = View.GONE
+                countryError.visibility = View.GONE
+                countryLoading.visibility = View.VISIBLE
+                viewModel.refreshFromAPI()
+                swipeRefreshLayout.isRefreshing = false
+            }
         }
+
+
         observeLiveData()
     }
 
@@ -46,8 +56,8 @@ class FeedFragment : Fragment() {
         viewModel.countries.observe(viewLifecycleOwner) { countries ->
 
             countries?.let {
-                binding.countryList.visibility = View.VISIBLE
                 countryAdapter.updateCountryList(countries)
+                binding.countryList.visibility = View.VISIBLE
             }
 
             viewModel.countryError.observe(viewLifecycleOwner) { error ->

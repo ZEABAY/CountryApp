@@ -1,15 +1,25 @@
 package com.example.countries.viewmodel
 
+import android.app.Application
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.countries.model.Country
+import com.example.countries.service.CountryDatabase
+import kotlinx.coroutines.launch
 
-class CountryViewModel : ViewModel() {
+class CountryViewModel(application: Application) : BaseViewModel(application) {
     val countryLiveData = MutableLiveData<Country>()
 
-    fun getDataFromRoom() {
-        val country = Country("Türkiye4", "Ankara4", "Asia4", "TRY4", "www.null.com", "Turkish4")
-        countryLiveData.value = country
+    fun getDataFromRoom(uuid: Int) {
+        launch {
+
+            val dao = CountryDatabase(getApplication()).countryDao()
+
+            val country = dao.getCountryById(uuid)
+            countryLiveData.value = country
+
+        }
+
     }
 
 }
